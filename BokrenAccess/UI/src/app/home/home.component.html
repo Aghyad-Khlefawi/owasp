@@ -1,0 +1,21 @@
+<div class="container">
+  <div class="data-container">
+    <div class="header">
+      <h3>Employees</h3>
+      <button *ngIf="isAdminUser" (click)="adminPage()">Admin page</button>
+      <button (click)="logout()">Logout</button>
+    </div>
+    <table>
+      <tr>
+        <th>First name</th>
+        <th>Last name</th>
+        <th>Title</th>
+      </tr>
+      <tr *ngFor="let employee of employees">
+        <td>{{employee.firstName}}</td>
+        <td>{{employee.lastName}}</td>
+        <td>{{employee.role}}</td>
+      </tr>
+    </table>
+  </div>
+</div>

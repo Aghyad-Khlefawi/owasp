@@ -1,0 +1,19 @@
+<div class="container">
+  <form>
+    <div class="row">
+      <label>Username</label>
+      <input (change)="updateUsername($event)">
+    </div>
+    <div class="row">
+      <label>Password</label>
+      <input type="password" (change)="updatePassword($event)">
+    </div>
+    <div class="row">
+      <button (click)="login($event)">Login</button>
+    </div>
+    <ng-container *ngIf="invalidLogin">
+      Invalid credentials.
+    </ng-container>
+  </form>
+
+</div>

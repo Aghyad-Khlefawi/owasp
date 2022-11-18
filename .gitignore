@@ -321,7 +321,7 @@ __pycache__/
 *.btm.cs
 *.odx.cs
 *.xsd.cs
-
+.angular/
 # OpenCover UI analysis results
 OpenCover/
 
@@ -348,3 +348,5 @@ MigrationBackup/
 
 # Ionide (cross platform F# VS Code tools) working folder
 .ionide/
+
+**/node_modules/

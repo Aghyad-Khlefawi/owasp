@@ -1,0 +1,31 @@
+.container {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  form {
+    background: #d0eef8;
+    padding: 20px;
+    border-radius: 4px;
+    display: flex;
+    flex-direction: column;
+
+    .row {
+      margin-bottom: 10px;
+      display: flex;
+      flex-direction: row;
+
+      label {
+        width: 80px;
+        min-width: 80px;
+      }
+    }
+
+    button {
+      flex-grow: 1;
+    }
+  }
+}
