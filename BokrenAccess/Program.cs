@@ -1,5 +1,8 @@
+using System.Data.SqlClient;
 using Bogus;
+using Dapper;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.FileProviders;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -31,11 +34,10 @@ List<User> users = new List<User>
     }
 };
 
-List<Data> data = new Faker<Data>()
-    .RuleFor(e => e.FirstName, e => e.Name.FirstName())
-    .RuleFor(e => e.LastName, e => e.Name.LastName())
-    .RuleFor(e => e.Role, e => e.Name.JobTitle())
-    .Generate(20);
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(builder.Environment.ContentRootPath)
+});
 
 app.UseCors("Any");
 
@@ -44,13 +46,13 @@ app.MapPost("/login", ([FromBody] LoginRequest request) =>
     var user = users.FirstOrDefault(e => e.Username == request.Username && e.Password == request.Password);
     if (user != null)
     {
-        return Results.Ok(new {username = user.Username,role=user.Role});
+        return Results.Ok(new {username = user.Username, role = user.Role});
     }
 
     return Results.BadRequest("Invalid credentials.");
 });
 
-app.MapGet("/data", async (context) =>
+app.MapGet("/employees", async (context) =>
 {
     if (!context.Request.Headers.TryGetValue("user-role", out var value))
     {
@@ -58,12 +60,27 @@ app.MapGet("/data", async (context) =>
         await context.Response.WriteAsync("Unauthorized");
     }
 
+    var connection = new SqlConnection(builder.Configuration.GetConnectionString("DbConnection"));
+    var data = connection.Query<Employee>("SELECT * FROM EMPLOYEES ");
     await context.Response.WriteAsJsonAsync(data);
+});
+
+app.MapGet("/employees/{id}", async (context) =>
+{
+    if (!context.Request.Headers.TryGetValue("user-role", out var value))
+    {
+        context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+        await context.Response.WriteAsync("Unauthorized");
+    }
+
+    var connection = new SqlConnection(builder.Configuration.GetConnectionString("DbConnection"));
+    var id = context.Request.Query["id"].ToString();
+    await context.Response.WriteAsJsonAsync(connection.QueryFirst<Employee>($"SELECT * FROM EMPLOYEES WHERE ID ={id}"));
 });
 
 app.MapGet("/admin", async (context) =>
 {
-    if (!context.Request.Headers.TryGetValue("user-role", out var value))
+    if (!context.Request.Headers.TryGetValue("user-role", out var value) || value != "admin")
     {
         context.Response.StatusCode = StatusCodes.Status401Unauthorized;
         await context.Response.WriteAsync("Unauthorized");
@@ -73,13 +90,6 @@ app.MapGet("/admin", async (context) =>
 });
 app.Run();
 
-
-class Data
-{
-    public string FirstName { get; set; }
-    public string LastName { get; set; }
-    public string Role { get; set; }
-}
 
 class User
 {

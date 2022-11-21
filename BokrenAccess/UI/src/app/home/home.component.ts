@@ -26,7 +26,7 @@ export class HomeComponent implements OnInit {
     }
     this._user = JSON.parse(this._user);
     this.isAdminUser = this._user.role == 'admin';
-    this._httpClient.get('http://localhost:5095/data', {
+    this._httpClient.get('http://localhost:5095/employees', {
       headers: {
         'user-role': this._user.role
       }
