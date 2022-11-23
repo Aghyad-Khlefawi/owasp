@@ -7,20 +7,52 @@
   justify-content: center;
 
   form {
-    background: #d0eef8;
+    box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
     padding: 20px;
     border-radius: 4px;
     display: flex;
     flex-direction: column;
+.invalid{
+  display: flex;
+  span{
+    align-self: center;
+    justify-self: center;
+    margin: 0 auto;
+    color: red;
+    font-weight: 700;
+  }
+}
+    .logo {
+      height: 300px;
+      display: flex;
+      align-items: center;
+      h1{
+        color: #2b65a7;
+        font-size: 3rem;
+      }
+    }
 
     .row {
       margin-bottom: 10px;
       display: flex;
       flex-direction: row;
+      align-items: center;
+
+      input {
+        height: 28px;
+      }
+
+      button {
+        height: 28px
+      }
 
       label {
         width: 80px;
         min-width: 80px;
+      }
+
+      &:last-child {
+        margin-bottom: 0;
       }
     }
 

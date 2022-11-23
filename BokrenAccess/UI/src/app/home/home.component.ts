@@ -1,5 +1,5 @@
 import {Component, OnInit} from '@angular/core';
-import {Router} from "@angular/router";
+import {ActivatedRoute, Router} from "@angular/router";
 import {HttpClient} from "@angular/common/http";
 
 @Component({
@@ -8,10 +8,12 @@ import {HttpClient} from "@angular/common/http";
   styleUrls: ['./home.component.scss']
 })
 export class HomeComponent implements OnInit {
+  titles: string[]=[];
 
 
   constructor(private _router: Router,
-              private _httpClient: HttpClient) {
+              private _httpClient: HttpClient,
+              private _route: ActivatedRoute) {
   }
 
   employees: any[] = [];
@@ -26,14 +28,30 @@ export class HomeComponent implements OnInit {
     }
     this._user = JSON.parse(this._user);
     this.isAdminUser = this._user.role == 'admin';
-    this._httpClient.get('http://localhost:5095/employees', {
-      headers: {
-        'user-role': this._user.role
-      }
-    })
-      .subscribe(res => {
-        this.employees = res as any[];
-      });
+
+    let url = 'http://localhost:5095/employees';
+    this._route.paramMap.subscribe(res => {
+      let title = res.get('title');
+      if (title)
+        url += `?role=${title}`;
+      this._httpClient.get(url, {
+        headers: {
+          'user-role': this._user.role
+        }
+      })
+        .subscribe(res => {
+          this.employees = res as any[];
+        });
+
+      this._httpClient.get('http://localhost:5095/titles', {
+        headers: {
+          'user-role': this._user.role
+        }
+      })
+        .subscribe(res => {
+          this.titles = res as any[];
+        });
+    });
   }
 
   adminPage() {
@@ -43,5 +61,13 @@ export class HomeComponent implements OnInit {
   logout() {
     localStorage.removeItem('user');
     this._router.navigate(['/login']);
+  }
+
+  typeChanged($event: Event) {
+    let value = ($event.target as HTMLSelectElement).value;
+    if(value)
+      this._router.navigate(['/home/'+value]);
+    else
+      this._router.navigate(['/home/']);
   }
 }

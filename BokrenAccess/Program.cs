@@ -18,6 +18,7 @@ builder.Services.AddCors(e =>
 
 var app = builder.Build();
 
+
 List<User> users = new List<User>
 {
     new()
@@ -28,8 +29,8 @@ List<User> users = new List<User>
     },
     new()
     {
-        Username = "guest",
-        Password = "guest",
+        Username = "user1",
+        Password = "user1",
         Role = "guest"
     }
 };
@@ -61,11 +62,15 @@ app.MapGet("/employees", async (context) =>
     }
 
     var connection = new SqlConnection(builder.Configuration.GetConnectionString("DbConnection"));
-    var data = connection.Query<Employee>("SELECT * FROM EMPLOYEES ");
-    await context.Response.WriteAsJsonAsync(data);
+
+    if (context.Request.Query.TryGetValue("role", out var role))
+        await context.Response.WriteAsJsonAsync(
+            connection.Query<Employee>($"SELECT * FROM EMPLOYEES WHERE Role ='{role}'"));
+    else
+        await context.Response.WriteAsJsonAsync(connection.Query<Employee>("SELECT * FROM EMPLOYEES "));
 });
 
-app.MapGet("/employees/{id}", async (context) =>
+app.MapGet("/titles", async (context) =>
 {
     if (!context.Request.Headers.TryGetValue("user-role", out var value))
     {
@@ -74,9 +79,10 @@ app.MapGet("/employees/{id}", async (context) =>
     }
 
     var connection = new SqlConnection(builder.Configuration.GetConnectionString("DbConnection"));
-    var id = context.Request.Query["id"].ToString();
-    await context.Response.WriteAsJsonAsync(connection.QueryFirst<Employee>($"SELECT * FROM EMPLOYEES WHERE ID ={id}"));
+
+    await context.Response.WriteAsJsonAsync(connection.Query<string>($"SELECT DISTINCT Role FROM EMPLOYEES "));
 });
+
 
 app.MapGet("/admin", async (context) =>
 {
@@ -103,3 +109,5 @@ class LoginRequest
     public string Username { get; set; }
     public string Password { get; set; }
 }
+
+//http://localhost:61898/home/Global%20Directives%20Liaison' update employees set lastname %3D 'test' where firstname %3D 'Jayden' --

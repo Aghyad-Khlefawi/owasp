@@ -1,19 +1,35 @@
 <div class="container">
   <form>
-    <div class="row">
-      <label>Username</label>
-      <input (change)="updateUsername($event)">
+    <div style="display: flex;flex-direction: row;align-items: center">
+      <div>
+        <div class="row">
+          <label>Username</label>
+          <input (change)="updateUsername($event)">
+        </div>
+        <div class="row">
+          <label>Password</label>
+          <input type="password" (change)="updatePassword($event)">
+        </div>
+        <div class="row">
+          <button (click)="login($event)">Login</button>
+        </div>
+        <ng-container *ngIf="invalidLogin">
+          <div class="invalid">
+            <span>Invalid credentials.</span>
+          </div>
+        </ng-container>
+      </div>
+      <div style="background: #dcdcdc;width: 2px;height: 100%;margin:0 25px"></div>
+      <div class="logo">
+        <h1 style="text-align: center">
+          Super Secure
+          <br/>
+          HR System
+        </h1>
+      </div>
+
+
     </div>
-    <div class="row">
-      <label>Password</label>
-      <input type="password" (change)="updatePassword($event)">
-    </div>
-    <div class="row">
-      <button (click)="login($event)">Login</button>
-    </div>
-    <ng-container *ngIf="invalidLogin">
-      Invalid credentials.
-    </ng-container>
   </form>
 
 </div>

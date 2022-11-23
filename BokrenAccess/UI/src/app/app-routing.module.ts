@@ -15,10 +15,16 @@ const routes: Routes = [{
   {
     path: 'home',
     component: HomeComponent
+  },{
+    path: 'home/:title',
+    component: HomeComponent
   },
   {
     path: 'admin',
     component: AdminComponent
+  },
+  {
+    path: '**', redirectTo: 'home', pathMatch: 'full'
   }];
 
 @NgModule({

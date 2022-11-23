@@ -1,8 +1,8 @@
-<div class="container">
+<div class="container" style="min-height: 450px ;min-width:500px">
   <div class="data-container">
     <div class="header">
-      <h3>Users</h3>
-      <button *ngIf="isAdminUser" (click)="homePage()">Employees</button>
+      <h3 style="margin-right: 20px">Users</h3>
+      <button *ngIf="isAdminUser" style="margin-right: 5px" (click)="homePage()">Employees</button>
       <button (click)="logout()">Logout</button>
     </div>
     <table>
