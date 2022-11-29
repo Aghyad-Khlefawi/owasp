@@ -17,7 +17,7 @@
         {
             Username = "user1",
             PasswordHash = "24C9E15E52AFC47C225B757E7BEE1F9D",
-            Role = "guest"
+            Role = "HR"
         }
     };
 }
