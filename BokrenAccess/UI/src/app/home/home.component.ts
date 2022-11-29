@@ -8,7 +8,7 @@ import {HttpClient} from "@angular/common/http";
   styleUrls: ['./home.component.scss']
 })
 export class HomeComponent implements OnInit {
-  titles: string[]=[];
+  titles: string[] = [];
 
 
   constructor(private _router: Router,
@@ -29,8 +29,8 @@ export class HomeComponent implements OnInit {
     this._user = JSON.parse(this._user);
     this.isAdminUser = this._user.role == 'admin';
 
-    let url = 'http://localhost:5095/employees';
     this._route.paramMap.subscribe(res => {
+      let url = 'http://localhost:5095/employees';
       let title = res.get('title');
       if (title)
         url += `?role=${title}`;
@@ -65,8 +65,8 @@ export class HomeComponent implements OnInit {
 
   typeChanged($event: Event) {
     let value = ($event.target as HTMLSelectElement).value;
-    if(value)
-      this._router.navigate(['/home/'+value]);
+    if (value)
+      this._router.navigate(['/home/' + value]);
     else
       this._router.navigate(['/home/']);
   }

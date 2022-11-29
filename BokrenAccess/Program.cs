@@ -1,10 +1,17 @@
 using System.Data.SqlClient;
-using Bogus;
+using System.Security.Cryptography;
+using System.Text;
+using BokrenAccess;
 using Dapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.FileProviders;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.WebHost.ConfigureServices((context, services) =>
+{
+    new DbSeeder(context.Configuration.GetConnectionString("DbConnection")).Seed();
+});
 
 builder.Services.AddCors(e =>
 {
@@ -17,34 +24,20 @@ builder.Services.AddCors(e =>
 });
 
 var app = builder.Build();
+app.UseCors("Any");
 
 
-List<User> users = new List<User>
-{
-    new()
-    {
-        Username = "admin",
-        Password = "admin",
-        Role = "admin"
-    },
-    new()
-    {
-        Username = "user1",
-        Password = "user1",
-        Role = "guest"
-    }
-};
-
+// Setup static file serving to download employees csv
 app.UseStaticFiles(new StaticFileOptions
 {
     FileProvider = new PhysicalFileProvider(builder.Environment.ContentRootPath)
 });
 
-app.UseCors("Any");
 
+// Login process
 app.MapPost("/login", ([FromBody] LoginRequest request) =>
 {
-    var user = users.FirstOrDefault(e => e.Username == request.Username && e.Password == request.Password);
+    var user = User.Users.FirstOrDefault(e => e.Username == request.Username && e.PasswordHash == Convert.ToHexString(MD5.HashData(Encoding.UTF8.GetBytes(request.Password))));
     if (user != null)
     {
         return Results.Ok(new {username = user.Username, role = user.Role});
@@ -53,6 +46,8 @@ app.MapPost("/login", ([FromBody] LoginRequest request) =>
     return Results.BadRequest("Invalid credentials.");
 });
 
+
+// Employee listing
 app.MapGet("/employees", async (context) =>
 {
     if (!context.Request.Headers.TryGetValue("user-role", out var value))
@@ -61,7 +56,7 @@ app.MapGet("/employees", async (context) =>
         await context.Response.WriteAsync("Unauthorized");
     }
 
-    var connection = new SqlConnection(builder.Configuration.GetConnectionString("DbConnection"));
+    await using var connection = new SqlConnection(builder.Configuration.GetConnectionString("DbConnection"));
 
     if (context.Request.Query.TryGetValue("role", out var role))
         await context.Response.WriteAsJsonAsync(
@@ -70,6 +65,7 @@ app.MapGet("/employees", async (context) =>
         await context.Response.WriteAsJsonAsync(connection.Query<Employee>("SELECT * FROM EMPLOYEES "));
 });
 
+// Employee titles dropdown
 app.MapGet("/titles", async (context) =>
 {
     if (!context.Request.Headers.TryGetValue("user-role", out var value))
@@ -78,36 +74,25 @@ app.MapGet("/titles", async (context) =>
         await context.Response.WriteAsync("Unauthorized");
     }
 
-    var connection = new SqlConnection(builder.Configuration.GetConnectionString("DbConnection"));
+    await using var connection = new SqlConnection(builder.Configuration.GetConnectionString("DbConnection"));
 
     await context.Response.WriteAsJsonAsync(connection.Query<string>($"SELECT DISTINCT Role FROM EMPLOYEES "));
 });
 
-
+// Users listing
 app.MapGet("/admin", async (context) =>
-{
+{   
     if (!context.Request.Headers.TryGetValue("user-role", out var value) || value != "admin")
     {
         context.Response.StatusCode = StatusCodes.Status401Unauthorized;
         await context.Response.WriteAsync("Unauthorized");
     }
 
-    await context.Response.WriteAsJsonAsync(users);
+    await context.Response.WriteAsJsonAsync(User.Users);
 });
+
 app.Run();
 
 
-class User
-{
-    public string Username { get; set; }
-    public string Password { get; set; }
-    public string Role { get; set; }
-}
-
-class LoginRequest
-{
-    public string Username { get; set; }
-    public string Password { get; set; }
-}
 
 //http://localhost:61898/home/Global%20Directives%20Liaison' update employees set lastname %3D 'test' where firstname %3D 'Jayden' --
